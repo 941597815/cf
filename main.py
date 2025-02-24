@@ -5,6 +5,7 @@ from logitech_driver import Logitech
 from random_delay import random_delay_ms
 from linstion import start_listener,start_keyboard
 from cf import worker_CF,worker_CF_zb
+from autoF import worker_auto_fire
 from globals import globals_instance
 # from ocr import worker_ocr
 
@@ -30,6 +31,7 @@ listener_keyboard_thread = threading.Thread(target=start_keyboard,args=(globals_
 # ocr_thread = threading.Thread(target=worker_ocr,args=(globals_instance,),daemon=True).start()
 listener_CF_thread = threading.Thread(target=worker_CF,args=(globals_instance,),daemon=True).start()
 listener_CF_zb_thread = threading.Thread(target=worker_CF_zb,args=(globals_instance,),daemon=True).start()
+listener_autoFire_thread = threading.Thread(target=worker_auto_fire,args=(globals_instance,),daemon=True).start()
 
 
 # 启动主任务线程

@@ -9,6 +9,7 @@ class Globals:
         self.firebtn = "p" 
         self.jtl = True
         self.mouseLeft = False
+        self.auto_fire=False
 
 # 创建全局变量实例
 globals_instance = Globals()

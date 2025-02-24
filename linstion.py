@@ -57,8 +57,13 @@ def on_release(key,globals_instance):
         else:
             winsound.Beep(800, 100)
             winsound.Beep(600, 100)
-    # if key == keyboard.Key.f6:
-    #     CF.guaji.zhubei()
+    if key == keyboard.Key.f7:
+        globals_instance.auto_fire=not globals_instance.auto_fire
+        if(globals_instance.auto_fire):
+            winsound.Beep(800, 200)
+        else:
+            winsound.Beep(800, 100)
+            winsound.Beep(600, 100)
 
 def start_keyboard(globals_instance):
     listener = keyboard.Listener(on_press=lambda key: on_press(key, globals_instance),on_release=lambda key: on_release(key, globals_instance))
