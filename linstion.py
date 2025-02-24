@@ -1,63 +1,66 @@
-from pynput import mouse
+from pynput import mouse,keyboard
+import os
 from logitech_driver import Logitech
-from random_delay import random_delay_ms
+from cf import CF
+import winsound
 import time
 
-import threading
-
-
-# 定义全局变量
-running = False
-isApi=False
+def fn(pressed,globals_instance):
+    if pressed:
+        if globals_instance.jtl:
+            globals_instance.running = True
+        else:
+            Logitech.keyboard.press(globals_instance.firebtn)
+    else:
+        if globals_instance.jtl:
+            globals_instance.running = False
+        else:
+            Logitech.keyboard.release(globals_instance.firebtn)
 
 # 鼠标点击回调函数
-def on_click(x, y, button, pressed):
-    global running,isApi
+def on_click(x, y, button, pressed, globals_instance):
     if button == mouse.Button.x1:  # 前进键
-        if pressed:
-            print("前进键按下，启动循环")
-            running = True
-        else:
-            print("前进键释放，停止循环")
-            running = False
-    # if button == mouse.Button.left:  # 检测鼠标左键
-    #     if pressed and (not isApi) and not running:
-    #         print("鼠标左键按下，启动循环")
-    #         running = True
-    #     else:
-    #         if not isApi:
-    #           ("鼠标左键释放，停止循环")
-    #           running = False
-
+        fn(pressed,globals_instance)
+    if button == mouse.Button.x2:  # 前进键
+        fn(pressed,globals_instance)
+    if button == mouse.Button.left:  # 检测鼠标左键
+        fn(pressed,globals_instance)
 
 # 鼠标监听器线程
-def start_listener():
-    listener = mouse.Listener(on_click=on_click)
+def start_listener(globals_instance):
+    listener = mouse.Listener(on_click=lambda x, y, button, pressed: on_click(x, y, button, pressed, globals_instance))
     listener.start()
     listener.join()
 
-# 主任务线程
-def main_task():
-    global running,isApi
-    while True:
-        if running:
-            print("循环中...")
-            Logitech.mouse.press(1)
-            random_delay_ms(101,150)
-            Logitech.mouse.release(1)
-            random_delay_ms(15,17)
+
+
+def on_press(key,globals_instance):
+    try:
+        # 检查按下的键是否是 Home 键
+        if key == keyboard.Key.home:
+            print("Home 键被按下")
+    except AttributeError:
+        pass  # 忽略特殊键（如 Shift、Ctrl 等）
+
+def on_release(key,globals_instance):
+    # 检查释放的键是否是 Home 键
+    if key == keyboard.Key.home:
+        print("Home 键被释放")
+        # Logitech.keyboard.release(globals_instance.firebtn)
+        os._exit(0)  # 结束程序
+    # # 如果按下 Esc 键，则停止监听
+    if key == keyboard.Key.f6:
+        globals_instance.cf.guaji=not globals_instance.cf.guaji
+        globals_instance.cf.zhunbei=not globals_instance.cf.zhunbei
+        if(globals_instance.cf.guaji):
+            winsound.Beep(800, 200)
         else:
-            time.sleep(0.1)  # 降低 CPU 使用率
+            winsound.Beep(800, 100)
+            winsound.Beep(600, 100)
+    # if key == keyboard.Key.f6:
+    #     CF.guaji.zhubei()
 
-# 启动监听器线程
-listener_thread = threading.Thread(target=start_listener)
-listener_thread.daemon = True  # 设置为守护线程
-listener_thread.start()
-
-# 启动主任务线程
-main_thread = threading.Thread(target=main_task)
-main_thread.start()
-
-
-
-
+def start_keyboard(globals_instance):
+    listener = keyboard.Listener(on_press=lambda key: on_press(key, globals_instance),on_release=lambda key: on_release(key, globals_instance))
+    listener.start()
+    listener.join()

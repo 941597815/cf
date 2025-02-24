@@ -1,10 +1,12 @@
 import ctypes
 import os
+import pyautogui
 
 try:
     root = os.path.abspath(os.path.dirname(__file__))
     driver = ctypes.CDLL(f'{root}/logitech.driver.dll')
     ok = driver.device_open() == 1  # 该驱动每个进程可打开一个实例
+
     if not ok:
         print('Error, GHUB or LGS driver not found')
 except FileNotFoundError:
@@ -60,6 +62,17 @@ class Logitech:
             if x == 0 and y == 0:
                 return
             driver.moveR(x, y, True)
+
+        def moveto(x,y):
+            pyautogui.moveTo(x, y, duration=0.8)
+            
+            # if not ok:
+            #     return
+            # if x == 0 and y == 0:
+            #     return
+            # position = pyautogui.position()
+            # print(position,position.x,position.y,x-position.x,y-position.y)
+            # driver.moveR(x-position.x, y-position.y, True)
 
     class keyboard:
 
