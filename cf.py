@@ -23,7 +23,7 @@ class CF:
             # pyautogui.keyDown('f11')
             # pyautogui.keyUp('f11')
             Logitech.keyboard.click('2')
-            Logitech.keyboard.click('p')
+            # Logitech.keyboard.click('p')
 
             random_delay_ms(900,2800)
         def zhubei():

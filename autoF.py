@@ -3,8 +3,15 @@ import numpy as np
 from PIL import Image
 import cv2
 import time
-from logitech_driver import Logitech
+from colormath.color_objects import sRGBColor, LabColor
+from colormath.color_conversions import convert_color
+from colormath.color_diff import delta_e_cie2000
 
+from logitech_driver import Logitech
+from random_delay import random_delay_ms
+# 添加兼容性补丁
+if not hasattr(np, 'asscalar'):
+    np.asscalar = lambda x: x.item()
 
 def custom_screenshot(bounding_box=None):
     """
@@ -29,10 +36,8 @@ def custom_screenshot(bounding_box=None):
 
         # 将截图转换为 numpy 数组并转换为 RGB 格式
         image = np.array(screenshot)[:, :, :3]  # 去掉透明通道（A），只保留 RGB
-        # # 保存截图
-        # output_path = "screenshot.png"
-        # save_image(image, output_path)
-        # print(f"截图已保存为 {output_path}")
+        # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) 
+       
     return image
 # 保存图像为文件
 def save_image(image, output_path):
@@ -51,8 +56,17 @@ def save_image(image, output_path):
 
 
 
-def v_value(rgb):
-    return cv2.cvtColor(np.uint8([[rgb]]), cv2.COLOR_BGR2HSV)[0][0][2]
+def hsv_value(rgb):
+    return cv2.cvtColor(np.uint8([[rgb]]), cv2.COLOR_RGB2HSV)[0][0]
+
+def is_red(hsv, min_s=50, min_v=50):
+    h, s, v = hsv
+    # 检查色相是否在红色区间
+    red_low = (h >= 0) and (h <= 15)
+    red_high = (h >= 165) and (h <= 180)
+    # 检查饱和度和明度是否足够
+    return (red_low or red_high) and (s >= min_s) and (v >= min_v)
+
 def check_pixel_surrounding(image_input, target_rgb1, target_rgb2, similarity_threshold=1, from_bgr=True):
     """
     检查图片中是否存在符合规则的像素点.
@@ -81,6 +95,10 @@ def check_pixel_surrounding(image_input, target_rgb1, target_rgb2, similarity_th
     else:
         rgb_img = img.copy()
 
+    # 保存截图
+    # output_path = "screenshot.png"
+    # save_image(rgb_img, output_path)
+    # print(f"截图已保存为 {output_path}")    
     # 获取图像的高度和宽度
     height, width, _ = rgb_img.shape
 
@@ -88,8 +106,10 @@ def check_pixel_surrounding(image_input, target_rgb1, target_rgb2, similarity_th
     for y in range(height):
         for x in range(width):
             current_pixel = rgb_img[y, x]
-            # 检查当前像素是否是 target_rgb2
-            if (current_pixel == target_rgb2).all():
+            #判断当前点是否在红色范围内
+            if ( not is_red(hsv_value(current_pixel)) ): continue  
+            # 检查当前像素相似度是否满足
+            if (color_similarity_rgb(target_rgb2,current_pixel) >= similarity_threshold):
                 # 收集上下左右四个相邻像素
                 neighbors = []
                 # 上
@@ -104,25 +124,92 @@ def check_pixel_surrounding(image_input, target_rgb1, target_rgb2, similarity_th
                 # 右
                 if x < width - 1:
                     neighbors.append(rgb_img[y, x+1])
-
+                # print(neighbors,target_rgb1,target_rgb2)
                 # 检查邻居像素是否至少包含一个 target_rgb1 和至少一个 target_rgb2
                 has_target1 = any((neighbor == target_rgb1).all() for neighbor in neighbors)
-                has_target2 = any((v_value(neighbor) / v_value(target_rgb2) >= similarity_threshold).all() for neighbor in neighbors)
+                has_target2 = any((neighbor == current_pixel).all() for neighbor in neighbors)
                 if has_target1 and has_target2:
-                    print(f"符合条件的像素点位于 (x={x}, y={y})")
+                    #print(color_similarity_rgb(target_rgb2,current_pixel),current_pixel,target_rgb2)
+                    # # 保存截图
+                    # output_path = "out.png"
+                    # save_image(rgb_img, output_path)
+                    # print(f"截图已保存为 {output_path}") 
+                    # print(f"符合条件的像素p点位于 (x={x}, y={y})")
                     return True  # 找到一个符合条件的像素点，返回 True
 
     # 遍历完整张图片未找到符合条件的像素点，返回 False
     # print("未找到符合条件的像素点")
     return False
 
+
+#基于 RGB欧氏距离 
+def color_similarity_rgb(rgb1, rgb2):
+    """计算 RGB 颜色相似度（0-1，1为完全相等）"""
+    # 计算欧氏距离
+    distance = sum((c1 - c2)**2 for c1, c2 in zip(rgb1, rgb2)) ** 0.5
+    # print(distance)
+    # 最大可能距离（黑到白）：√(255² + 255² + 255²) ≈ 441.67
+    max_distance = (255**2 * 3) ** 0.5
+    # 归一化到 0-1 并反转（1表示完全相似）
+    similarity = 1 - (distance / max_distance)
+    # print(round(similarity, 2))
+    return round(similarity, 2)
+
+#基于 CIELAB Delta E 2000
+def color_similarity(rgb1, rgb2):
+    # 转换RGB到sRGBColor对象
+    color1 = sRGBColor(rgb1[0], rgb1[1], rgb1[2], is_upscaled=True)
+    color2 = sRGBColor(rgb2[0], rgb2[1], rgb2[2], is_upscaled=True)
+    # 转换为Lab颜色空间
+    lab1 = convert_color(color1, LabColor)
+    lab2 = convert_color(color2, LabColor)
+    # 计算Delta E 2000
+    delta_e = delta_e_cie2000(lab1, lab2)
+    # 将Delta E转换为0-1的相似度，最大值设为100
+    similarity = max(0.0, 1.0 - delta_e / 100.0)
+    return round(similarity, 2)  # 保留2位小数
+def fast_rgb_similarity(rgb1, rgb2):
+    """基于加权欧氏距离的近似算法"""
+    r_mean = (rgb1[0] + rgb2[0]) / 2
+    r = rgb1[0] - rgb2[0]
+    g = rgb1[1] - rgb2[1]
+    b = rgb1[2] - rgb2[2]
+    return 1 - np.sqrt((2 + r_mean/256)*r**2 + 4*g**2 + (2 + (255 - r_mean)/256)*b**2) / 1400
+
 def autoFire(globals_instance):
-    bounding_box = (800-14, 500, 800+14, 514)
+    bounding_box = (800-14, 500, 800+14, 514) #1600x900
+    rgb_a = (0, 0, 0)
+    rgb_b = (242, 74, 23)
+    rgb_c = (177, 60, 45)
+    rgb_d = (160, 57, 50)
+    rgb_e = (154, 55, 52)
+    rgb_Center = (198, 65, 38)
+
     image = custom_screenshot(bounding_box)
-    isFire = check_pixel_surrounding(image,(0, 0, 0), (242, 74, 23),0.8)
+    isFire = check_pixel_surrounding(image, rgb_a, rgb_Center, globals_instance.similarity)
     if (isFire):
-        Logitech.keyboard.click(globals_instance.firebtn)
-        print('开火')
+        random_delay_ms(globals_instance.fireDelay,globals_instance.fireDelay+10)
+        if(globals_instance.jujiqiang):
+            print('jujiqiang')
+            Logitech.mouse.click(2)
+            random_delay_ms(40,60)
+            Logitech.keyboard.click(globals_instance.firebtn)
+            random_delay_ms(50,80)
+
+
+        elif(globals_instance.buqiang):
+            Logitech.keyboard.click(globals_instance.firebtn)
+            random_delay_ms(3,15)
+            Logitech.mouse.move(x=0,y=2)
+            
+
+                
+        else:
+            1
+        # Logitech.keyboard.press(globals_instance.firebtn)
+        # random_delay_ms(10,20)
+        # Logitech.keyboard.release(globals_instance.firebtn)
+        # print('开火')
 
 
 def worker_auto_fire(globals_instance):
@@ -130,17 +217,15 @@ def worker_auto_fire(globals_instance):
         if(globals_instance.auto_fire):
             autoFire(globals_instance)
         else:
-            time.sleep(0.002)
-
-
-# if __name__ == "__main__":
-#     # 设置截图区域和间隔
-#     # bounding_box = (1650, 940, 1900, 1000)
-#     bounding_box = (800-14, 500, 800+14, 514)
-#     # while True:
-#     # custom_screenshot(bounding_box)
-#     check_pixel_surrounding('1.png',(0, 0, 0), (242, 74, 23),0.8)
-#       # time.sleep(0.01)
+            time.sleep(1)
         
 
-    
+
+# while True:
+#     start=time.time()
+#     color_similarity(color1,color2)
+
+
+#     end=time.time()
+#     print(end-start)
+# Logitech.mouse.move(x=0,y=2)

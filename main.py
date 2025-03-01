@@ -1,4 +1,3 @@
-from pynput import mouse
 import time
 import threading
 from logitech_driver import Logitech
@@ -32,7 +31,6 @@ listener_keyboard_thread = threading.Thread(target=start_keyboard,args=(globals_
 listener_CF_thread = threading.Thread(target=worker_CF,args=(globals_instance,),daemon=True).start()
 listener_CF_zb_thread = threading.Thread(target=worker_CF_zb,args=(globals_instance,),daemon=True).start()
 listener_autoFire_thread = threading.Thread(target=worker_auto_fire,args=(globals_instance,),daemon=True).start()
-
 
 # 启动主任务线程
 main_thread = threading.Thread(target=main_task)

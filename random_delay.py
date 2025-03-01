@@ -22,8 +22,8 @@ def my_random(m, n):  # 修改函数名，避免与标准库冲突
         # 如果生成的随机数小于m，补一个均匀分布的随机数
         generated_random = rnd.randint(m, n)
     # 打印调试信息（仅当m=10时）
-    if m == 10:
-        print(f"{generated_random}\n")
+    # if m == 10:
+        # print(f"{generated_random}\n")
     return generated_random
 
 # 示例用法
