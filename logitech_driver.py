@@ -4,19 +4,19 @@ import pyautogui
 
 try:
     root = os.path.abspath(os.path.dirname(__file__))
-    driver = ctypes.CDLL(f'{root}/logitech.driver.dll')
+    driver = ctypes.CDLL(f"{root}/logitech.driver.dll")
     ok = driver.device_open() == 1  # 该驱动每个进程可打开一个实例
-
+    os.system("cls")
+    print("正在启动程序...")
     if not ok:
-        print('Error, GHUB or LGS driver not found')
+        print("Error, GHUB or LGS driver not found")
 except FileNotFoundError:
-    print(f'Error, DLL file not found')
+    print(f"Error, DLL file not found")
 
 
 class Logitech:
 
     class mouse:
-
         """
         code: 1:左键, 2:中键, 3:右键
         """
@@ -63,9 +63,9 @@ class Logitech:
                 return
             driver.moveR(x, y, True)
 
-        def moveto(x,y):
+        def moveto(x, y):
             pyautogui.moveTo(x, y, duration=0.8)
-            
+
             # if not ok:
             #     return
             # if x == 0 and y == 0:
@@ -75,7 +75,6 @@ class Logitech:
             # driver.moveR(x-position.x, y-position.y, True)
 
     class keyboard:
-
         """
         键盘按键函数中，传入的参数采用的是键盘按键对应的键码
         code: 'a'-'z':A键-Z键, '0'-'9':0-9, 其他的没猜出来
