@@ -5,10 +5,7 @@ import time
 
 def worker_macro(globals_instance):
     while True:
-        if not globals_instance.game_status:
-            time.sleep(0.1)
-            continue
-        if globals_instance.running:
+        if globals_instance.running and globals_instance.game_status:
             if globals_instance.jtl:
                 if globals_instance.debug:
                     print("炼狱...")
@@ -35,8 +32,9 @@ def worker_macro(globals_instance):
                     print("狙击枪...")
 
                 if globals_instance.auto_fire:
-                    Logitech.mouse.click(2)
-                    random_delay_ms(50, 70)
+                    if globals_instance.auto_fire_openScope:
+                        Logitech.mouse.click(2)
+                        random_delay_ms(50, 70)
                     Logitech.keyboard.click(globals_instance.firebtn)
                     random_delay_ms(50, 80)
                 else:

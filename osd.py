@@ -1,6 +1,5 @@
 import tkinter as tk
 from ctypes import windll
-import time
 
 on_color = "red"
 off_color = "#ffffff"

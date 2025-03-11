@@ -8,11 +8,15 @@ CF 鼠标宏 不限鼠标
 
 安装 requirements.txt
 
+```bash
+pip install -r requirements.txt
+```
+
 管理员运行 run.bat
 
 #### 游戏设置
 
-分辨率 1600x900 全屏
+分辨率 1600x900/1920x1080/2560x1440 全屏
 
 HUD 放大 开
 
@@ -35,3 +39,11 @@ HUD 放大 开
 - Alt+U 开启/关闭 USP 模式
 
 ###### HOME 退出程序
+
+效果图
+
+![](.\imgs\img.png)
+
+![](.\imgs\img1.png)
+
+![](.\imgs\img2.png)

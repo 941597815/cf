@@ -113,6 +113,9 @@ def hsv_value(rgb):
 # 基于 RGB欧氏距离
 def color_similarity_rgb(rgb1, rgb2):
     """计算 RGB 颜色相似度（0-1，1为完全相等）"""
+    # 将颜色值转换为浮点数
+    rgb1 = [float(c) for c in rgb1]
+    rgb2 = [float(c) for c in rgb2]
     # 计算欧氏距离
     distance = sum((c1 - c2) ** 2 for c1, c2 in zip(rgb1, rgb2)) ** 0.5
     # print(distance)

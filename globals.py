@@ -19,6 +19,7 @@ class Globals:
         self.mouseLeft = False
         self.weapons_identification = False  # F5 武器自动识别，开启后可能会引起卡顿
         self.auto_fire = False  # F7 红名自动开火
+        self.auto_fire_openScope = False  # 自动开火时自动开镜
         self.fireDelay = 30  # 开火延迟ms
         self.similarity = 0.87  # 红名相似度
         self.resolution = 2  # 游戏分辨率：1=1600x900 2=1920x1080 3=2560x1440

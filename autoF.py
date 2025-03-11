@@ -78,7 +78,7 @@ def check_pixel_surrounding(rgb_img, target_rgb1, target_rgb2, similarity_thresh
                 if has_target1 and has_target2:
                     # print(color_similarity_rgb(target_rgb2,current_pixel),current_pixel,target_rgb2)
                     # # 保存截图
-                    # save_image(rgb_img)
+                    # save_image(rgb_img, "redName.png")
                     # print(f"符合条件的像素p点位于 (x={x}, y={y})")
                     return True  # 找到一个符合条件的像素点，返回 True
 
