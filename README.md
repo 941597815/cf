@@ -42,8 +42,9 @@ HUD 放大 开
 
 效果图
 
-![](.\imgs\img.png)
+<img src="imgs\img.png">
 
-![](.\imgs\img1.png)
+<img src="imgs\img1.png">
 
-![](.\imgs\img2.png)
+<img src="imgs\img2.png">
+
