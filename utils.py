@@ -23,7 +23,7 @@ game_dict = {
         "weapon_Identify_box": (2270, 1301 - 2, 2542, 1301 + 20 + 2),
     },
     "jtl": "加林炼狱",
-    "usp": "uspUSPcopCOP沙鹰",
+    "usp": "uspUSPcopCOP沙鹰修罗",
     "ju": "BarrettAWM98K",
 }
 

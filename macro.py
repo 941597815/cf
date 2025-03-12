@@ -53,14 +53,22 @@ def worker_macro(globals_instance):
                 random_delay_ms(22, 30)
                 if globals_instance.auto_fire:
                     Logitech.mouse.move(x=0, y=2)
-
-        # if globals_instance.shandun:
-        #     Logitech.keyboard.click_('ctrl')
-        #     random_delay_ms(35,50)
-        # if globals_instance.liantiao:
-        #     Logitech.keyboard.click_('space')
-        #     random_delay_ms(35,50)
         else:
             time.sleep(0.008)  # 降低 CPU 使用率
             if globals_instance.buqiang and not globals_instance.auto_fire:
                 Logitech.keyboard.release(globals_instance.firebtn)
+
+        if globals_instance.shandun and globals_instance.game_status:
+            if globals_instance.jtl:
+                Logitech.mouse.click(2)
+                random_delay_ms(264, 270)
+                Logitech.keyboard.click(globals_instance.firebtn)
+                random_delay_ms(20, 25)
+            else:
+                Logitech.keyboard.press("lctrl")
+                random_delay_ms(20, 25)
+                Logitech.keyboard.release("lctrl")
+                random_delay_ms(20, 25)
+        if globals_instance.liantiao and globals_instance.game_status:
+            Logitech.keyboard.click("space")
+            random_delay_ms(6, 10)

@@ -18,7 +18,7 @@ def worker_ocr(globals_instance):
             )
             if globals_instance.debug:
                 updata_osd(globals_instance, text)
-                # print(f"识别到文字{text}")
+                print(f"识别到文字{text}")
             if text:
                 # 判断是否包含“炼狱”
                 if text_diff(game_dict["jtl"], text, 1):
